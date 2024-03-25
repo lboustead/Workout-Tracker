@@ -1,0 +1,38 @@
+{% extends 'fitness_app/base.html' %} {% block title %} Workout Details{%endblock title%} 
+
+{% block topleft %}<a href="{% url 'home' %}"class="btn btn-primary btn">Back</a>{% endblock topleft %} 
+{% block topright %}<a href="{% url 'add_exercise' workout.workout_id %}"class="btn btn-primary btn">Add Exercise</a>{% endblock topright %} 
+{% block center %}Workout: {{workout.workout_name}}{%endblock center %} 
+
+{% block content %} 
+{% if exercises%} 
+{% for e in exercises%}
+<div style="padding: 10px">
+  <div class="card workout_card">
+    <div class="card-body">
+      <div class="row justify-content-between">
+        <div class="col-auto">
+          <h5 class="card-title">Exercise: {{e.exercise_name}}</h5>
+        </div>
+        <div class="col-lg"></div>
+        <div class="col-auto">
+          <a
+            href="{% url 'exercise_details' e.exercise_id %}"
+            class="btn btn-primary btn-sm"
+            >Edit Exercise</a
+          >
+        </div>
+        <div class="col-auto">
+          <a
+            href="{% url 'delete_exercise' e.exercise_id %}"
+            class="btn btn-danger btn-sm"
+            >Remove</a
+          >
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endfor %} {% else %}
+<h4 style="text-align: center">You have no exercises</h4>
+{% endif %} {% endblock content %}

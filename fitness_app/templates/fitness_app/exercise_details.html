@@ -1,0 +1,40 @@
+{% extends 'fitness_app/base.html' %} {% block title %} Exercise Details
+{% endblock title %} 
+
+{% block topleft %}<a href="{% url 'workout_details' workout.workout_id %}" class="btn btn-primary btn">Back</a>{% endblock topleft %} 
+{% block topright %}<a href="{% url 'add_set' exercise.exercise_id %}"class="btn btn-primary btn">Add Set</a>{% endblock topright %} 
+{% block center %}Exercise: {{exercise.exercise_name}}{% endblock center %} 
+
+{% block content %} 
+{% if sets %}
+<div class="container">
+  <table class="table center-table" style="text-align: center">
+    <thead>
+      <tr>
+        <th scope="col">Set #</th>
+        <th scope="col">Reps x Weight</th>
+        <th>Test</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for s in sets %}
+      <tr>
+        <th scope="row">{{s.set}}</th>
+        <td>{{s.reps}} x {{s.weight}}</td>
+        <td>
+          <a
+            href="{% url 'delete_set' s.set_id %}"
+            class="btn btn-danger btn-sm"
+            >Remove</a
+          >
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% else %}
+<h4 style="text-align: center">You have no sets</h4>
+{% endif %} 
+{% endblock content %}
