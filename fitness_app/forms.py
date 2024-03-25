@@ -25,12 +25,14 @@ class AddExerciseForm(forms.ModelForm):
         
 
 class AddSetForm(forms.ModelForm):
-    exercise = forms.IntegerField
-    set = forms.IntegerField
+    weight = forms.FloatField(required=True, label="", widget=forms.widgets.TextInput(
+        attrs={"class": "form-control", "placeholder": "weight"}))
     reps = forms.IntegerField(required=True, label="", widget=forms.widgets.TextInput(
         attrs={"class": "form-control", "placeholder": "reps"}))
-    weight = forms.IntegerField(required=True, label="", widget=forms.widgets.TextInput(
-        attrs={"class": "form-control", "placeholder": "weight"}))
     class Meta:
         model = Sets
         exclude = ('exercise', 'set')
+        fields =[
+            "weight",
+            "reps"
+        ]

@@ -60,6 +60,7 @@ def login_user(request):
     
 def logout_user(request):
     logout(request)
+    
     messages.success(request, "You have been successfully logged out")
     return redirect('login')
 
@@ -107,7 +108,7 @@ def add_exercise(request, pk):
                 form.workout = workout
                 form.save()
                 messages.success(request, "New Exercise Created")
-                return HttpResponseRedirect(reverse(workout_details, args=(workout.pk,)))
+                return HttpResponseRedirect(reverse(exercise_details, args=(form.pk,)))
         return render(request, "fitness_app/add_exercise.html", {"form": temp_form})
     else:
         messages.success(request, "You must be logged in")

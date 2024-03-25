@@ -1,23 +1,21 @@
-{% extends 'fitness_app/base.html' %} 
-{% block title %} Exercise Details {% endblock title%}
-{% block content %}
+{% extends 'fitness_app/base.html' %} {% block title %} Exercise Details
+{%endblock title%} {% block content %}
 <div class="mt-4 p-5">
-    <h1>Add Exercise</h1>
-    <form method="POST" action="">
-        {% csrf_token %}
-        {% if form.errors %}
-            <div class="alert alert-warning alert-dismissible fade show" role="alert">
-                Your form has errors
-                {% for field in form %}
-                {% if field.errors %}
-                {{ field.errors }}
-                {% endif %}
-                {% endfor %}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        {% endif %}
-        {{form.as_p}}
-        <button type="submit" class="btn btn-secondary"> Add Exercise</button>
-    </form>
+  <h1>Add Exercise</h1>
+  <form method="POST" action="">
+    {% csrf_token %} {% if form.errors %}
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+      Your form has errors {% for field in form %} {% if field.errors %}
+      {{field.errors }} {% endif %} {% endfor %}
+      <button
+        type="button"
+        class="btn-close"
+        data-bs-dismiss="alert"
+        aria-label="Close"
+      ></button>
+    </div>
+    {% endif %} {{form.as_p}}
+    <button type="submit" class="btn btn-secondary">Submit</button>
+  </form>
 </div>
 {% endblock content %}
