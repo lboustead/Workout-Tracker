@@ -5,8 +5,10 @@
   href="{% url 'add_workout' %}"
   class="btn btn-primary btn"
   >Add Workout</a
->{% endblock topright %} {% block center %}My Workouts{% endblock center %}
-{%block content %} {% if workouts %} {% for w in workouts %}
+>{% endblock topright %} {% block center %} {% if workouts %}My Workouts
+{% else %}You have no workouts
+{% endif %}{% endblock center %} {%block content %} 
+{%if workouts%} {% for w in workouts %}
 <div class="container p-2">
   <div class="card workout_card">
     <h5 class="card-header">{{w.date}}</h5>
@@ -39,7 +41,6 @@
 </div>
 
 {% endfor %} {% else %}
-<h4 style="text-align: center">You have no workouts</h4>
 {% endif %} {% endblock content%}
 
 <script>

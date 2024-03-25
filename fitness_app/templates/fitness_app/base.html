@@ -20,20 +20,25 @@
     {% include 'fitness_app/navbar.html' %}
 
     <div class="container p-1 pt-3">
-      <div class="row justify-content-between" style="align-items: center">
-        <div class="col-auto">{% block topleft %}{% endblock topleft %}</div>
-        <div class="col-auto">{% block topright %}{% endblock topright %}</div>
-      </div>
-    </div>
-    <div class="container p-1 pb-3">
-      <div class="row justify-content-center">
-        <div class="col-auto">
+      <div class="row justify-content-between" style="align-items:center">
+        <div class="col-sm float-left">
+          <div class="">
+            {% block topleft %}{% endblock topleft %}
+          </div>
+        </div>
+        <div class="col-auto text-center">
           <h3>{% block center %}{% endblock center %}</h3>
+        </div>
+        <div class="col-sm">
+          <div class="float-end">
+            {% block topright %}{% endblock topright %}
+          </div>
+          
         </div>
       </div>
     </div>
 
-    <div class="container">
+    <div class="container p-3">
       {% if messages %} {% for message in messages %}
       <div
         class="alert alert-success alert-dismissible fade show"
