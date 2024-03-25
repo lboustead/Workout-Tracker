@@ -118,7 +118,6 @@ def add_exercise(request, pk):
                 return HttpResponseRedirect(reverse(exercise_details, args=(form.pk,)))
         else:
             return render(request, "fitness_app/add_exercise.html", {"form": temp_form, "workout":workout.pk})
-
             
     else:
         messages.success(request, "You must be logged in")
@@ -136,6 +135,9 @@ def add_set(request, pk):
                 form.set = num_sets
                 form.save()
                 messages.success(request, "New Set Created")
+                return HttpResponseRedirect(reverse(exercise_details, args=(exercise.pk,)))
+            else:
+                messages.success(request, "Reps must be a whole number")
                 return HttpResponseRedirect(reverse(exercise_details, args=(exercise.pk,)))
         else:
             return render(request, "fitness_app/add_set.html", {"form": temp_form, "exercise": exercise.pk})
