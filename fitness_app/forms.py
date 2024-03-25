@@ -1,16 +1,12 @@
 from django import forms
 from .models import Workout, Exercise, Sets
-from django.contrib.auth.models import User
-from django.db import models
-from django.forms import ModelForm
-
-class AddWorkoutForm(forms.ModelForm):
     
+class AddWorkoutForm(forms.ModelForm):
+    #username = forms.CharField()
     workout_name = forms.CharField(required=True, label="", widget=forms.widgets.TextInput(
         attrs={"class": "form-control", "placeholder": "Workout Name"}))
-    username = forms.IntegerField
-    date = forms.DateField(required=True, label="",widget=forms.widgets.TextInput(
-        attrs={"class": "form-control", "placeholder": "Date yyyy-mm-dd"}))
+    date = forms.DateField(required=True, label="", widget=forms.widgets.DateInput(
+        attrs={"class": "form-control", "placeholder": "yyyy-mm-dd"}))
     class Meta:
         model = Workout
         exclude = ('username',)
@@ -36,3 +32,4 @@ class AddSetForm(forms.ModelForm):
             "weight",
             "reps"
         ]
+        

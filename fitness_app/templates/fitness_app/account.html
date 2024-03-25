@@ -3,7 +3,7 @@
 {% block content %}
 <form method="POST" action="{% url 'account' %}">
     {% csrf_token %}
-    <h1>This is account.html</h1>
+    <h1>Create an account</h1>
     {{ form }}
     <button type="submit" class="btn btn-primary">Create Account</button>
 </form>

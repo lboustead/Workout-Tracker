@@ -1,5 +1,7 @@
 {% extends 'fitness_app/base.html' %} {% block title %} Exercise Details
-{%endblock title%} {% block content %}
+{%endblock title%}
+{% block topleft %}<a href="{% url 'home'%}" class="btn btn-primary btn">Back</a>{% endblock topleft %} 
+{% block content %}
 <div class="mt-4 p-5">
   <h1>Add Workout</h1>
   <form method="POST" action="">

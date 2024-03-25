@@ -5,9 +5,11 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.shortcuts import render, redirect
 from django.contrib.auth.forms import UserCreationForm
-from .forms import AddWorkoutForm, AddExerciseForm, AddSetForm
+from .forms import *
 from django.http import HttpResponseRedirect, HttpResponse
 from django.db.models import Count
+from django.contrib.auth.models import User
+from django.contrib.auth.forms import *
 
 
 # Create your views here.
@@ -44,6 +46,7 @@ def home(request):
 
 
 def login_user(request):
+    attempts_count=0
     if request.method=="POST":
         username = request.POST['username']
         password = request.POST['password']
@@ -54,13 +57,13 @@ def login_user(request):
             return redirect("home")
         else:
             messages.success(request, "This username or password is incorrect.")
+            attempts_count+=1
             return redirect("login")
     else:
         return render(request, "fitness_app/login.html", {})
     
 def logout_user(request):
     logout(request)
-    
     messages.success(request, "You have been successfully logged out")
     return redirect('login')
 
@@ -69,16 +72,20 @@ def create_user(request):
         form = UserCreationForm(request.POST)
         if form.is_valid():
             form.save()
-            username = form.cleaned_data['username']
+            username = form.data['username']
             password = form.cleaned_data['password1']
             user = authenticate(username = username, password = password)
             login(request, user)
             messages.success(request, "Registration successfull")
             return redirect('home')
+        else:
+            messages.error(request, "Username already exists or password did not meet requirements.")
+            return redirect('login')
     else:
+        
         form = UserCreationForm()
         return render(request, "fitness_app/account.html", {
-            'form':form,
+        'form':form,
         })
     
     
@@ -109,7 +116,10 @@ def add_exercise(request, pk):
                 form.save()
                 messages.success(request, "New Exercise Created")
                 return HttpResponseRedirect(reverse(exercise_details, args=(form.pk,)))
-        return render(request, "fitness_app/add_exercise.html", {"form": temp_form})
+        else:
+            return render(request, "fitness_app/add_exercise.html", {"form": temp_form, "workout":workout.pk})
+
+            
     else:
         messages.success(request, "You must be logged in")
         return redirect("login")
@@ -127,7 +137,8 @@ def add_set(request, pk):
                 form.save()
                 messages.success(request, "New Set Created")
                 return HttpResponseRedirect(reverse(exercise_details, args=(exercise.pk,)))
-        return render(request, "fitness_app/add_set.html", {"form": temp_form})
+        else:
+            return render(request, "fitness_app/add_set.html", {"form": temp_form, "exercise": exercise.pk})
     else:
         messages.success(request, "You must be logged in")
         return redirect("login")

@@ -20,7 +20,7 @@
       {% for s in sets %}
       <tr>
         <th scope="row">{{s.set}}</th>
-        <td>{{s.reps}} x {{s.weight}}</td>
+        <td>{{s.weight}} x {{s.reps}}</td>
         <td>
           <a
             href="{% url 'delete_set' s.set_id %}"
