@@ -32,11 +32,11 @@
       {% endfor %}
     </tbody>
   </table>
-  <div class="d-flex justify-content-center">
-    <a href="{% url 'add_set' exercise.exercise_id %}"class="btn btn-primary btn btn-sm">Add Set</a>
-  </div>
 </div>
 {% else %}
 <h4 style="text-align: center">You have no sets</h4>
 {% endif %} 
+<div class="d-flex justify-content-center">
+  <a href="{% url 'add_set' exercise.exercise_id %}"class="btn btn-primary btn btn-sm">Add Set</a>
+</div>
 {% endblock content %}

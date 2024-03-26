@@ -1,23 +1,27 @@
 from django import forms
 from .models import Workout, Exercise, Sets
+from django.contrib.admin.widgets import AdminDateWidget
+from django.forms.fields import DateField
+from django.forms.widgets import NumberInput
+
+
     
 class AddWorkoutForm(forms.ModelForm):
-    #username = forms.CharField()
     workout_name = forms.CharField(required=True, label="", widget=forms.widgets.TextInput(
         attrs={"class": "form-control", "placeholder": "Workout Name"}))
-    date = forms.DateField(required=True, label="", widget=forms.widgets.DateInput(
-        attrs={"class": "form-control", "placeholder": "yyyy-mm-dd"}))
+    #date = forms.DateField(required=True, widget=forms.SelectDateWidget())
+    date = forms.DateTimeField(label="Date", required=True, widget=NumberInput(attrs={'type':'date'}))
     class Meta:
         model = Workout
         exclude = ('username',)
     
 class AddExerciseForm(forms.ModelForm):
-    workout = forms.IntegerField
+    #workout = forms.IntegerField
     exercise_name = forms.CharField(required=True, label="", widget=forms.widgets.TextInput(
         attrs={"class": "form-control", "placeholder": "Exercise"}))
     class Meta:
         model = Exercise
-        exclude = ('workout',)
+        exclude = ('workout','volume')
         
 
 class AddSetForm(forms.ModelForm):

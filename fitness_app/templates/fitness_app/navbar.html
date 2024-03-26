@@ -19,10 +19,11 @@
           <a class="nav-link" href="{% url 'logout' %}">Logout</a>
         </li>
         {% else %}
+        
+        {% endif %}
         <li class="nav-item">
           <a class="nav-link" href="{% url 'admin:index' %}">Admin</a>
         </li>
-        {% endif %}
       </ul>
     </div>
   </div>

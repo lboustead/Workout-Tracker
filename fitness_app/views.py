@@ -23,7 +23,6 @@ def home(request):
         if workouts:
             for w in workouts:
                 exercises = Exercise.objects.filter(workout=w).annotate(set_count=Count('sets'))
-            
                 #calculate totals in workout
                 total_set_count = 0
                 total_volume = 0
@@ -36,8 +35,7 @@ def home(request):
                 w.total_volume = total_volume
         
         #Establishing context
-        context = {'workouts': workouts,
-                   }
+        context = {'workouts': workouts,}
         return render(request, 'fitness_app/home.html', context=context)
     else:
         return redirect('login')
@@ -118,7 +116,6 @@ def add_exercise(request, pk):
                 return HttpResponseRedirect(reverse(exercise_details, args=(form.pk,)))
         else:
             return render(request, "fitness_app/add_exercise.html", {"form": temp_form, "workout":workout.pk})
-            
     else:
         messages.success(request, "You must be logged in")
         return redirect("login")
@@ -175,7 +172,16 @@ def delete_set(request, pk):
 def workout_details(request, pk):
     workout = Workout.objects.get(pk=pk)
     exercises = Exercise.objects.filter(workout_id=pk).order_by('exercise_id')
-
+    for e in exercises:
+        total_volume = 0
+        total_set_count = 0
+        sets = Sets.objects.filter(exercise=e)
+        for s in sets:
+            total_volume += (s.weight*s.reps)
+            total_set_count = sets.count
+        e.volume = total_volume
+        e.set_count = total_set_count
+        
     context = {'exercises': exercises,
                'workout': workout}
     return render(request, "fitness_app/workout_details.html", context=context)
