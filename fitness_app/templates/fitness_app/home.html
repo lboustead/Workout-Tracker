@@ -13,14 +13,18 @@
   <div class="card workout_card">
     <h5 class="card-header">{{w.date}}</h5>
     <div class="card-body">
+
       <div class="row justify-content-between">
+
         <div class="col-auto">
           <h5 class="card-title">Workout: {{w.workout_name}}</h5>
           <p>Total Exercises: {{w.exercise_count}}</p>
           <p>Total Sets: {{w.total_set_count}}</p>
           <p>Total Volume: {{w.total_volume}}</p>
         </div>
+
         <div class="col-lg"></div>
+
         <div class="col-auto">
           <a
             href="{% url 'workout_details' w.workout_id %}"
@@ -28,6 +32,7 @@
             >Edit Workout</a
           >
         </div>
+        
         <div class="col-auto justify-content-end">
           <a
             href="{% url 'delete_workout' w.workout_id %}"

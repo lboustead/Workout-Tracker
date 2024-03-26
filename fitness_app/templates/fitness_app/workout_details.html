@@ -10,21 +10,27 @@
 <div style="padding: 10px">
   <div class="card workout_card">
     <div class="card-body">
+
       <div class="row justify-content-between">
+
         <div class="col-auto">
+
           <h5 class="card-title">Exercise: {{e.exercise_name}}</h5>
-        </div>
-        <div class="col-lg"></div>
-        <div class="col-auto">
           <p>Total Volume: {{e.volume}}</p>
           <p>Total Sets: {{e.set_count}}</p>
-          <a
-            href="{% url 'exercise_details' e.exercise_id %}"
-            class="btn btn-primary btn-sm"
-            >Edit Exercise</a
-          >
         </div>
+
+        <div class="col-lg"></div>
+
         <div class="col-auto">
+          <a
+          href="{% url 'exercise_details' e.exercise_id %}"
+          class="btn btn-primary btn-sm"
+          >Edit Exercise</a
+        >
+        </div>
+          
+        <div class="col-auto justify-content-end">
           <a
             href="{% url 'delete_exercise' e.exercise_id %}"
             class="btn btn-danger btn-sm"
