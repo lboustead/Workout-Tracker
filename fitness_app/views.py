@@ -10,38 +10,17 @@ from django.http import HttpResponseRedirect, HttpResponse
 from django.db.models import Count
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import *
+from django.db.models import Count, Sum
 
 
 # Create your views here.
 
 def home(request):
     if request.user.is_authenticated:
-        workouts = Workout.objects.filter(username=request.user).annotate(exercise_count=Count('exercise')).order_by('-date')
-        
-        #getting each exercise in the workout requested
-        #Assigning set_count to count number of sets in each workout
-        if workouts:
-            for w in workouts:
-                exercises = Exercise.objects.filter(workout=w).annotate(set_count=Count('sets'))
-                #calculate totals in workout
-                total_set_count = 0
-                total_volume = 0
-                for e in exercises:
-                    sets = Sets.objects.filter(exercise=e)
-                    for s in sets:
-                        total_volume += (s.weight*s.reps)
-                    total_set_count += e.set_count
-                w.total_set_count = total_set_count
-                w.total_volume = total_volume
-        
-        #Establishing context
-        context = {'workouts': workouts,}
-        return render(request, 'fitness_app/home.html', context=context)
+        recent_workouts = Workout.objects.filter(username=request.user).order_by('-date')[:10]
+        return render(request, 'fitness_app/home.html', {'recent_workouts': recent_workouts})
     else:
         return redirect('login')
-
-
-
 
 def login_user(request):
     attempts_count=0
@@ -97,7 +76,7 @@ def add_workout(request):
                 form.username = user_name
                 form.save()
                 messages.success(request, "New Workout Created")
-                return HttpResponseRedirect(reverse(workout_details, args=(form.pk,)))
+                return HttpResponseRedirect(reverse(add_exercise, args=(form.pk,)))
         return render(request, "fitness_app/add_workout.html", {"form": temp_form})
     else:
         messages.success(request, "You must be logged in")
@@ -113,7 +92,7 @@ def add_exercise(request, pk):
                 form.workout = workout
                 form.save()
                 messages.success(request, "New Exercise Created")
-                return HttpResponseRedirect(reverse(exercise_details, args=(form.pk,)))
+                return HttpResponseRedirect(reverse(add_set, args=(form.pk,)))
         else:
             return render(request, "fitness_app/add_exercise.html", {"form": temp_form, "workout":workout.pk})
     else:
@@ -142,14 +121,11 @@ def add_set(request, pk):
         messages.success(request, "You must be logged in")
         return redirect("login")
     
-
-    
-
 def delete_workout(request, pk):
     record = Workout.objects.get(pk=pk)
     record.delete()
     messages.success(request, "Workout deleted")
-    return redirect('home')
+    return redirect('workout_list')
 
 def delete_exercise(request, pk):
     record = Exercise.objects.get(pk=pk)
@@ -166,12 +142,12 @@ def delete_set(request, pk):
     messages.success(request, "Set deleted")
     return HttpResponseRedirect(reverse(exercise_details, args=(exercise.pk,)))
 
-
-
-
 def workout_details(request, pk):
     workout = Workout.objects.get(pk=pk)
-    exercises = Exercise.objects.filter(workout_id=pk).order_by('exercise_id')
+    exercises = Exercise.objects.filter(workout_id=pk).order_by('exercise_id').annotate(
+        volume=Sum('sets__weight'),
+        set_count=Count('sets')
+    )
     for e in exercises:
         total_volume = 0
         total_set_count = 0
@@ -186,10 +162,22 @@ def workout_details(request, pk):
                'workout': workout}
     return render(request, "fitness_app/workout_details.html", context=context)
 
+def workout_list(request):
+    user = request.user
+    workouts = Workout.objects.filter(username=user).annotate(
+        exercise_count=Count('exercise', distinct=True),
+        total_set_count=Count('exercise__sets__set'),
+    ).order_by('-date')
+    return render(request, 'fitness_app/workout_list.html', {'workouts': workouts})
+
+def exercise_list(request):
+    exercises = Exercise.objects.filter(workout__username=request.user)
+    return render(request, 'fitness_app/exercise_list.html', {'exercises': exercises})
+
 def exercise_details(request, exercise_pk):
     exercise = Exercise.objects.get(pk=exercise_pk)
     workout = Workout.objects.get(workout_id=exercise.workout.pk)
-    sets = Sets.objects.filter(exercise_id=exercise_pk).order_by('set')
+    sets = Sets.objects.filter(exercise_id=exercise_pk).order_by('-set')
     context = {'sets': sets,
                'exercise': exercise,
                'workout': workout}

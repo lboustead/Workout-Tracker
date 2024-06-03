@@ -1,47 +1,50 @@
-{% extends 'fitness_app/base.html' %} {% block title %} Workout Details{%endblock title%} 
+{% extends 'fitness_app/base.html' %}
 
-{% block topleft %}<a href="{% url 'home' %}"class="btn btn-primary btn">Back</a>{% endblock topleft %} 
-{% block topright %}<a href="{% url 'add_exercise' workout.workout_id %}"class="btn btn-primary btn">Add Exercise</a>{% endblock topright %} 
-{% block center %}Workout: {{workout.workout_name}}{%endblock center %} 
+{% block title %} Workout Details {% endblock title %}
 
-{% block content %} 
-{% if exercises%} 
-{% for e in exercises%}
-<div style="padding: 10px">
-  <div class="card workout_card">
-    <div class="card-body">
+{% block topleft %}
+<a href="{% url 'workout_list' %}" class="btn btn-primary btn">Back</a>
+{% endblock topleft %}
 
-      <div class="row justify-content-between">
+{% block topright %}
+<a href="{% url 'add_exercise' workout.workout_id %}" class="btn btn-primary btn">Add Exercise</a>
+{% endblock topright %}
 
-        <div class="col-auto">
+{% block center %}
+Workout: {{ workout.workout_name }}
+{% endblock center %}
 
-          <h5 class="card-title">Exercise: {{e.exercise_name}}</h5>
-          <p>Total Volume: {{e.volume}}</p>
-          <p>Total Sets: {{e.set_count}}</p>
+{% block content %}
+{% if exercises %}
+    {% for e in exercises %}
+        <div style="padding: 10px">
+            <div class="card workout_card">
+                <div class="card-body">
+                    <div class="row justify-content-between p-1">
+                        <div class="col-auto">
+                            <h4 class="card-title">{{ e.exercise_name }}</h4>
+                            <p>{{ workout.date }}</p>
+							<p>Total Sets: {{ e.set_count }}</p>
+                            <p>Total Volume: {{ e.volume }}</p>
+                            
+                        </div>
+                        <div class="col-auto">
+                            {% for set in e.sets_set.all %}
+                                <h6>{{ set.weight }} lbs x {{ set.reps }} reps</h6>
+                            {% endfor %}
+                        </div>
+                        <div class="col-auto justify-content-end">
+                            <div class="d-flex flex-column p-2">
+                                <a href="{% url 'exercise_details' e.exercise_id %}" class="btn btn-primary btn-sm mb-2">Edit Exercise</a>
+                                <a href="{% url 'delete_exercise' e.exercise_id %}" class="btn btn-danger btn-sm">Remove</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-
-        <div class="col-lg"></div>
-
-        <div class="col-auto">
-          <a
-          href="{% url 'exercise_details' e.exercise_id %}"
-          class="btn btn-primary btn-sm"
-          >Edit Exercise</a
-        >
-        </div>
-          
-        <div class="col-auto justify-content-end">
-          <a
-            href="{% url 'delete_exercise' e.exercise_id %}"
-            class="btn btn-danger btn-sm"
-            >Remove</a
-          >
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-{% endfor %} {% else %}
-<h4 style="text-align: center">You have no exercises</h4>
+    {% endfor %}
+{% else %}
+    <h4 style="text-align: center">You have no exercises</h4>
 {% endif %}
 {% endblock content %}

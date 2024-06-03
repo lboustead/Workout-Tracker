@@ -2,7 +2,7 @@
 {% endblock title %} 
 
 {% block topleft %}<a href="{% url 'workout_details' workout.workout_id %}" class="btn btn-primary btn">Back</a>{% endblock topleft %} 
-
+{% block topright %}<a href="{% url 'add_exercise' workout.workout_id %}" class="btn btn-primary btn">Add Another Exercise</a>{% endblock topright %} 
 {% block center %}Exercise: {{exercise.exercise_name}}{% endblock center %} 
 
 {% block content %} 

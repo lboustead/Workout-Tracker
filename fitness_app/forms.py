@@ -1,16 +1,11 @@
 from django import forms
 from .models import Workout, Exercise, Sets
-from django.contrib.admin.widgets import AdminDateWidget
-from django.forms.fields import DateField
 from django.forms.widgets import NumberInput
 
-
-    
 class AddWorkoutForm(forms.ModelForm):
     workout_name = forms.CharField(required=True, label="", widget=forms.widgets.TextInput(
         attrs={"class": "form-control", "placeholder": "Workout Name"}))
-    #date = forms.DateField(required=True, widget=forms.SelectDateWidget())
-    date = forms.DateTimeField(label="Date", required=True, widget=NumberInput(attrs={'type':'date'}))
+    date = forms.DateTimeField(label="", required=True, widget=NumberInput(attrs={'type':'date'}))
     class Meta:
         model = Workout
         exclude = ('username',)
@@ -23,7 +18,6 @@ class AddExerciseForm(forms.ModelForm):
         model = Exercise
         exclude = ('workout','volume')
         
-
 class AddSetForm(forms.ModelForm):
     weight = forms.FloatField(required=True, label="", widget=forms.widgets.TextInput(
         attrs={"class": "form-control", "placeholder": "weight"}))

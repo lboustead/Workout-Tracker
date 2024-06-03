@@ -1,67 +1,46 @@
-{% extends 'fitness_app/base.html' %} {% block title %} Home {% endblock title%}
+{% extends 'fitness_app/base.html' %}
+
+{% block title %} Dashboard {% endblock title%}
+
 {% block topleft %}
-<h4>Hello, {{ user.username|title }}</h4>
-{% endblock topleft %} {% block topright %}<a
-  href="{% url 'add_workout' %}"
-  class="btn btn-primary btn"
-  >Add Workout</a
->{% endblock topright %} {% block center %} {% if workouts %}My Workouts
-{% else %}You have no workouts
-{% endif %}{% endblock center %} {%block content %} 
-{%if workouts%} {% for w in workouts %}
-<div class="container p-2">
-  <div class="card workout_card">
-    <h5 class="card-header">{{w.date}}</h5>
-    <div class="card-body">
+    <h4>Hello, {{ user.username|title }}</h4>
+{% endblock topleft %}
 
-      <div class="row justify-content-between">
+{% block topright %}
+    <a href="{% url 'workout_list' %}" class="btn btn-primary btn">My Workouts</a>
+{% endblock topright %}
 
-        <div class="col-auto">
-          <h5 class="card-title">Workout: {{w.workout_name}}</h5>
-          <p>Total Exercises: {{w.exercise_count}}</p>
-          <p>Total Sets: {{w.total_set_count}}</p>
-          <p>Total Volume: {{w.total_volume}}</p>
+{% block content %}
+    <div class="row text-center g-0">
+        <div class="col-12 col-md-6 border-end p-2 mb-3">
+            <h3>Recent Workouts</h3>
+            <div class="row row-cols-1 g-3">
+                {% if recent_workouts %}
+                    {% for workout in recent_workouts %}
+                        <div class="col">
+                            <div class="card h-100">
+                                <div class="card-body d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h5 class="card-title mb-0">{{ workout.workout_name }}</h5>
+                                        <p class="card-text mb-0">{{ workout.date }}</p>
+                                    </div>
+                                    <a href="{% url 'workout_details' workout.workout_id %}" class="btn btn-primary btn-sm">View Details</a>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <p>No recent workouts found.</p>
+                {% endif %}
+            </div>
         </div>
+        <div class="col-12 col-md-6 p-2 mb-3">
+            <h3>This week's highlights</h3>
+            <div class="row row-cols-1 g-3">
 
-        <div class="col-lg"></div>
-
-        <div class="col-auto">
-          <a
-            href="{% url 'workout_details' w.workout_id %}"
-            class="btn btn-primary btn-sm"
-            >Edit Workout</a
-          >
+            <!--Enter week highlights-->
+            
+            </div>
         </div>
-        
-        <div class="col-auto justify-content-end">
-          <a
-            href="{% url 'delete_workout' w.workout_id %}"
-            class="btn btn-danger btn-sm"
-            >Remove</a
-          >
-        </div>
-      </div>
     </div>
-  </div>
-</div>
-
-{% endfor %} {% else %}
-{% endif %} {% endblock content%}
-
-<script>
-  // Function to remove messages after 5 seconds
-  function removeMessages() {
-    setTimeout(function () {
-      // Get all message elements
-      var messages = document.querySelectorAll(".alert-warning");
-
-      // Remove each message element
-      messages.forEach(function (message) {
-        message.remove();
-      });
-    }, 5000); // 5000 milliseconds = 5 seconds
-  }
-
-  // Call the removeMessages function when the page is loaded
-  window.onload = removeMessages;
-</script>
+{% endblock content %}
