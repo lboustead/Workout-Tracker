@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+{% block title %} Meal Entry {% endblock title %}
+{% block content %}
+<div class="row justify-content-between text-center">
+    {% for item in title_calculations %}
+        <div class="col-auto">
+            <p>{{ item.value }}</p>
+            <p>{{ item.label }}</p>
+        </div>
+        {% if not forloop.last %}
+            <div class="col-auto">
+                <p>{{ item.operator }}</p>
+            </div>
+        {% endif %}
+    {% endfor %}
+</div>
+
+<div class="container my-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <form method="get" action="{% url 'nutrition_home_date' selected_date|date:'Y-m-d' %}">
+            <input type="hidden" name="prev" value="1">
+            <button class="btn btn-primary" type="submit">&lt;</button>
+        </form>
+        <h1 class="text-center">Meal Entries for {{ selected_date }}</h1>
+        <form method="get" action="{% url 'nutrition_home_date' selected_date|date:'Y-m-d' %}">
+            <input type="hidden" name="next" value="1">
+            <button class="btn btn-primary" type="submit">&gt;</button>
+        </form>
+    </div>
+
+    {% for meal_value, meal_display in meals %}
+    <div class="card my-3">
+        <div class="card-body text-center">
+            <h5>{{ meal_display }}</h5>
+            {% for food_entry in logged_foods %}
+            {% if food_entry.meal == meal_value %}
+            <div class="row justify-content-between">
+                <div class="col">
+                    <p>{{ food_entry }}</p>
+                </div>
+                <div class="col-auto">
+                    <a href="{% url 'delete_entry' food_entry.id %}" class="btn btn-danger btn-sm">Remove</a>
+                </div>
+            </div>
+            {% endif %}
+            {% endfor %}
+            <a href="{% url 'add_meal_entry' meal_value selected_date %}" class="btn btn-info btn-sm">Add
+                Food</a>
+        </div>
+    </div>
+    {% endfor %}
+    <h3>Total Protein: {{ total_protein }}</h3>
+    <h3>Total Fat: {{ total_fat }}</h3>
+    <h3>Total Carb: {{ total_carb }}</h3>
+    <h3>Total Calories: {{ total_calories }}</h3>
+
+    <a href="{% url 'my_info' %}" class="btn btn-info">Change Goal</a>
+</div>
+{% endblock content %}

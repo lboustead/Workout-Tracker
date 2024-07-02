@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+
+{% block title %} My Workouts {% endblock title%}
+{% block topleft %}
+<a href="{% url 'dashboard' %}" class="btn btn-primary btn">Back</a>
+{% endblock topleft %}
+{% block topright %}
+<a href="{% url 'add_workout' %}" class="btn btn-primary btn">Add Workout</a>
+{% endblock topright %}
+
+{% block center %}
+{% if workouts %}
+All Workouts
+{% else %}
+You have no workouts
+{% endif %}
+{% endblock center %}
+
+{% block content %}
+{% if workouts %}
+{% for w in workouts %}
+<div style="padding: 10px">
+    <div class="card workout_card">
+        <div class="card-body">
+            <div class="row justify-content-between p-1">
+                <div class="col-auto">
+                    <h4 class="card-title">{{ w.workout_name }}</h4>
+                    <p>{{w.date}}</p>
+                    <p>Total Exercises: {{ w.exercise_count }}</p>
+                    <p>Total Sets: {{ w.total_set_count }}</p>
+                </div>
+                <div class="col-auto">
+                    {% for exercise in w.exercise_set.all %}
+                    <h6>{{exercise.exercise_name}} </h6>
+                    {% endfor %}
+                </div>
+                <div class="col-auto justify-content-end">
+                    <div class="d-flex flex-column p-2">
+                        <a href="{% url 'workout_details' w.workout_id %}" class="btn btn-primary btn-sm mb-3">Edit
+                            Workout</a>
+                        <a href="{% url 'delete_workout' w.workout_id %}" class="btn btn-danger btn-sm">Remove</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+{% endif %}
+{% endblock content %}

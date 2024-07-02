@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% block title %} Add Food Entry {% endblock title %}
+{% block content %}
+<div class="container mt-5">
+    <h1 class="mb-4">Add Meal Entry</h1>
+    <form method="post">
+        {% csrf_token %}
+        <div class="mb-3 row">
+            <label for="food" class="col-sm-2 col-form-label">Food</label>
+            <div class="col-sm-8">
+                <select id="food" name="food" class="form-control">
+                    {% for food in foods %}
+                    <option value="{{ food.id }}">{{ food.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-sm-2">
+                <a href="{% url 'add_food' meal=meal date=date %}" class="btn btn-secondary">New
+                    food</a>
+            </div>
+        </div>
+        <div class="mb-3 row">
+            <label for="servings" class="col-sm-2 col-form-label">Servings</label>
+            <div class="col-sm-10">
+                <input type="number" id="servings" name="servings" class="form-control">
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary">Add Meal Entry</button>
+    </form>
+</div>
+{% endblock content %}

@@ -1,0 +1,144 @@
+{% extends 'base.html' %}
+{% block title %}My Info{% endblock title %}
+{% block content %}
+<div class="container">
+    <h1>Account Information</h1>
+    <form method="post" id="info-form">
+        {% csrf_token %}
+        
+        <div class="mb-3">
+            {{ form.current_weight.label_tag }} <span id="current_weight">{{ form.current_weight }}</span>
+        </div>
+        <div class="mb-3">
+            {{ form.goal_weight.label_tag }} <span id="goal_weight">{{ form.goal_weight }}</span>
+        </div>
+        <div class="mb-3">
+            {{ form.height.label_tag }} <span id="height">{{ form.height }}</span>
+        </div>
+        <div class="mb-3">
+            {{ form.age.label_tag }} <span id="age">{{ form.age }}</span>
+        </div>
+        <div class="mb-3">
+            {{ form.gender.label_tag }} <span id="gender">{{ form.gender }}</span>
+        </div>
+        <div class="mb-3">
+            {{ form.activity_level.label_tag }} <span id="activity_level">{{ form.activity_level }}</span>
+        </div>
+        
+        <!-- Display weight_goal and weight_goal_pounds in the same row -->
+        <div class="row mb-3">
+            <div class="col-auto">
+                <div class="form-group">
+                    {{ form.weight_goal.label_tag }} {{ form.weight_goal }}
+                </div>
+            </div>
+            <div class="col-auto">
+                <div class="form-group">
+                    Goal Lbs./Week: {{ form.weight_goal_pounds }}
+                </div>
+            </div>
+        </div>
+        
+        <div class="mb-3">
+            Recommended Calories: <span id="recommended-calories">{{ recommended_calories }}</span>
+        </div>
+        
+        <div class="mb-3">
+            {{ form.calorie_intake.label_tag }} <span id="calorie_intake">{{ form.calorie_intake }}</span>
+        </div>
+
+        <!-- Button to use recommended calories -->
+        <button type="button" class="btn btn-secondary" id="use-recommended-calories">
+            Use recommended calories
+        </button>
+
+        <button type="submit" class="btn btn-primary">Save</button>
+    </form>
+</div>
+
+<!-- JavaScript to handle form field changes -->
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        var form = document.getElementById("info-form");
+        var recommendedCaloriesSpan = document.getElementById("recommended-calories");
+        var calorieIntakeField = document.getElementById("id_calorie_intake");
+
+        // Function to calculate and update recommended calories
+        function updateRecommendedCalories() {
+            // Retrieve values from relevant form fields
+            var currentWeight = parseFloat(document.getElementById("id_current_weight").value);
+            var goalWeight = parseFloat(document.getElementById("id_goal_weight").value);
+            var height = parseFloat(document.getElementById("id_height").value);
+            var age = parseInt(document.getElementById("id_age").value);
+            var gender = document.getElementById("id_gender").value;
+            var activityLevel = document.getElementById("id_activity_level").value; // Retrieve as string
+            var weightGoal = document.getElementById("id_weight_goal").value;
+            var weightGoalPounds = parseFloat(document.getElementById("id_weight_goal_pounds").value);
+
+            // Perform calculation based on retrieved values (replace with your calculation logic)
+            var calculatedCalories = calculateRecommendedCalories(currentWeight, goalWeight, height, age, gender, activityLevel, weightGoal, weightGoalPounds);
+
+            // Update recommended calories display
+            recommendedCaloriesSpan.textContent = calculatedCalories;
+
+            // Set the calorie_intake field value (optional)
+            // calorieIntakeField.value = calculatedCalories;
+        }
+        updateRecommendedCalories();
+
+        // Attach event listeners to relevant form fields
+        form.addEventListener("input", function(event) {
+            if (event.target.matches("#id_current_weight, #id_goal_weight, #id_height, #id_age, #id_gender, #id_activity_level, #id_weight_goal, #id_weight_goal_pounds")) {
+                updateRecommendedCalories();
+            }
+        });
+
+        // Function to calculate recommended calories (replace with your own logic)
+        function calculateRecommendedCalories(currentWeight, goalWeight, height, age, gender, activityLevel, weightGoal, weightGoalPounds) {
+            var kilogram = currentWeight * 0.453592; // Convert pounds to kilograms
+            var centimeter = height * 2.54; // Convert inches to centimeters
+            var BMR_male = 13.397 * kilogram + 4.799 * centimeter - 5.677 * age + 88.362;
+            var BMR_female = 9.247 * kilogram + 3.098 * centimeter - 4.330 * age + 447.593;
+            var calories = 2000; // Default base calories
+
+            if (gender === 'M') {
+                calories = BMR_male;
+            } else {
+                calories = BMR_female;
+            }
+
+            if (activityLevel === '1') {
+                calories *= 1.2;
+            } else if (activityLevel === '2') {
+                calories *= 1.375;
+            } else if (activityLevel === '3') {
+                calories *= 1.55;
+            } else if (activityLevel === '4') {
+                calories *= 1.725;
+            }
+
+            if (weightGoal === 'maintain') {
+                document.getElementById("id_weight_goal_pounds").value = 0.0;
+                document.getElementById("id_weight_goal_pounds").disabled = true;
+            } else if (weightGoal === 'lose') {
+                calories -= (weightGoalPounds * 500);
+                document.getElementById("id_weight_goal_pounds").disabled = false;
+            } else if (weightGoal === 'gain') {
+                calories += (weightGoalPounds * 500);
+                document.getElementById("id_weight_goal_pounds").disabled = false;
+            }
+
+            return Math.round(calories); // Round calories to nearest whole number
+        }
+
+        // Button to use recommended calories
+        var useRecommendedButton = document.getElementById("use-recommended-calories");
+        if (useRecommendedButton && calorieIntakeField) {
+            useRecommendedButton.addEventListener("click", function() {
+                calorieIntakeField.value = recommendedCaloriesSpan.textContent;
+            });
+        }
+    });
+</script>
+
+{% endblock content %}
