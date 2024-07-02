@@ -17,7 +17,7 @@ from django.db.models import Count, Sum
 
 def home(request):
     if request.user.is_authenticated:
-        recent_workouts = Workout.objects.filter(username=request.user).order_by('-date')[:10]
+        recent_workouts = Workout.objects.filter(user=request.user).order_by('-date')[:10]
         return render(request, 'workout_tracker_app/home.html', {'recent_workouts': recent_workouts})
     else:
         return redirect('login')
@@ -120,7 +120,7 @@ def workout_details(request, pk):
 
 def workout_list(request):
     user = request.user
-    workouts = Workout.objects.filter(username=user).annotate(
+    workouts = Workout.objects.filter(user=request.user).annotate(
         exercise_count=Count('exercise', distinct=True),
         total_set_count=Count('exercise__sets__set'),
     ).order_by('-date')

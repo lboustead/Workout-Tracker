@@ -9,7 +9,7 @@
 {% endblock topright %}
 
 {% block center %}
-{% if workouts %}
+{% if recent_workouts %}
 All Workouts
 {% else %}
 You have no workouts
@@ -17,8 +17,8 @@ You have no workouts
 {% endblock center %}
 
 {% block content %}
-{% if workouts %}
-{% for w in workouts %}
+{% if recent_workouts %}
+{% for w in recent_workouts %}
 <div style="padding: 10px">
     <div class="card workout_card">
         <div class="card-body">
