@@ -1,0 +1,35 @@
+{% extends 'base.html' %} 
+
+{% block title %}Add Workout{% endblock title %} 
+
+{% block topleft %}
+<a href="javascript:window.history.back()" class="btn btn-warning">Back</a>
+{% endblock topleft %} 
+
+{% block content %}
+<div class="mt-4 p-5 text-light bg-dark rounded shadow-lg">
+  <h1 class="text-warning text-center mb-4">Add Workout</h1>
+
+  <form method="POST" action="" class="bg-secondary p-4 rounded shadow">
+    {% csrf_token %}
+
+    <!-- Display Errors -->
+    {% if form.errors %}
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+      <strong>Error:</strong> Please correct the highlighted fields below. {%for field in form %} {% if field.errors %}
+      <div>{{ field.errors }}</div>
+      {% endif %} {% endfor %}
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endif %}
+
+    <!-- Render Form Fields -->
+    <div class="mb-3">{{ form.as_p }}</div>
+
+    <!-- Submit Button -->
+    <div class="text-center mt-4">
+      <button type="submit" class="btn btn-warning btn-lg px-5 shadow">Submit</button>
+    </div>
+  </form>
+</div>
+{% endblock content %}

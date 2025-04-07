@@ -1,40 +1,126 @@
-{% extends 'base.html' %} {% block title %} Exercise Details
-{% endblock title %}
+{% extends 'base.html' %}
 
-{% block topleft %}<a href="{% url 'workout_details' workout.workout_id %}" class="btn btn-primary btn">Back</a>{%
-endblock topleft %}
-{% block topright %}<a href="{% url 'add_exercise' workout.workout_id %}" class="btn btn-primary btn">Add Another
-	Exercise</a>{% endblock topright %}
-{% block center %}Exercise: {{exercise.exercise_name}}{% endblock center %}
+{% block title %}Exercise Details{% endblock title %}
+
+{% block action %}Delete{% endblock action %}
+
+{% block confirmation_text %}
+  Are you sure you want to go back? Your exercise will be deleted because it has no sets.
+{% endblock confirmation_text %}
+
+
+{% block topleft %}
+{% if sets %}
+  <a href="javascript:window.history.back()" class="btn btn-warning">Back</a>
+{% else %}
+  <a href="#" class="btn btn-warning"
+     data-bs-toggle="modal"
+     data-bs-target="#deleteConfirmationModal"
+     data-delete-url="{% url 'delete_exercise' exercise.exercise_id %}">
+     Back
+  </a>
+{% endif %}
+{% endblock topleft %}
+
+
+{% block center %}x
+<div class="d-flex align-items-center">
+  <form method="POST" id="sets-form" class="d-flex align-items-center mb-0">
+    {% csrf_token %}
+    <!-- Editable Exercise Name -->
+    <input type="text" name="exercise_name" id="exercise_name"
+      class="form-control bg-transparent text-warning border-0 p-0 ps-1 ms-1 text-center"
+      value="{{ exercise.exercise_name }}"
+      style="font-size: 1.75rem; font-weight: bold; width: auto" required />
+    
+    <!-- Save Changes Button -->
+    <button type="submit" name="save_changes" class="btn btn-success d-none ms-3" id="save-changes-btn">Save</button>
+  </form>
+</div>
+{% endblock center %}
+
 
 {% block content %}
-{% if sets %}
+<!-- Existing Sets Section -->
 <div class="container">
-	<table class="table center-table" style="text-align: center">
-		<thead>
-			<tr>
-				<th scope="col">Set #</th>
-				<th scope="col">Reps x Weight</th>
-				<th>Test</th>
-			</tr>
-		</thead>
-		<tbody>
-			{% for s in sets %}
-			<tr>
-				<th scope="row">{{s.set}}</th>
-				<td>{{s.weight}} x {{s.reps}}</td>
-				<td>
-					<a href="{% url 'delete_set' s.set_id %}" class="btn btn-danger btn-sm">Remove</a>
-				</td>
-			</tr>
-			{% endfor %}
-		</tbody>
-	</table>
+  
+    <!-- Section of current set data -->
+    <div class="row gy-3">
+      {% if sets %} {% for s in sets %}
+      <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center p-3 bg-secondary text-light rounded shadow-sm text-center border">
+            <h5 class="m-0 ms-3">Set {{ s.set }}</h5>
+            <div class="d-flex">
+              <div class="me-3">
+                <label for="weight{{ s.set }}" class="form-label text-warning my-1">Weight</label>
+                <input type="number" name="weight_{{ s.set_id }}" id="weight{{ s.set }}" value="{{ s.weight }}" class="form-control form-control-sm bg-dark text-light border-secondary" />
+              </div>
+              <div>
+                <label for="reps{{ s.set }}" class="form-label text-warning my-1">Reps</label>
+                <input type="number" name="reps_{{ s.set_id }}" id="reps{{ s.set }}" value="{{ s.reps }}" class="form-control form-control-sm bg-dark text-light border-secondary" />
+              </div>
+            </div>
+          <div>
+            <!-- Dropdown for Delete -->
+            <div class="dropdown">
+              <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">Options</button>
+              <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                <li>
+                  <a class="dropdown-item text-danger" href="{% url 'delete_set' s.set_id %}">Delete</a>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endfor %} {% endif %}
+    </div>
+  </form>
 </div>
-{% else %}
-<h4 style="text-align: center">You have no sets</h4>
-{% endif %}
-<div class="d-flex justify-content-center">
-	<a href="{% url 'add_set' exercise.exercise_id %}" class="btn btn-primary btn btn-sm">Add Set</a>
+
+<!-- Add Set Form -->
+<div class="container my-4">
+  <h3 class="text-warning ms-2">Add a Set</h3>
+  <form method="POST" class="bg-secondary text-light p-4 rounded shadow-sm">
+    {% csrf_token %}
+    <div class="row mb-3">
+      <div class="col">{{ forms.weight }}</div>
+      <div class="col">{{ forms.reps }}</div>
+    </div>
+    <div class="d-flex justify-content-center mt-3">
+      <button type="submit" name="add_set" class="btn btn-success">Add Set</button>
+    </div>
+  </form>
 </div>
+
+<!-- JavaScript for Enabling Save Changes Button -->
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const form = document.getElementById("sets-form");
+    const saveChangesButton = document.getElementById("save-changes-btn");
+    const inputs = form.querySelectorAll("input[type='number']");
+    const exerciseNameInput = document.getElementById("exercise_name");
+
+    // Store the original exercise name
+    const originalExerciseName = exerciseNameInput.value;
+
+    // Track changes to enable the Save Changes button
+    const toggleSaveButton = () => {
+      const hasSetChanges = Array.from(inputs).some((input) => input.value !== input.defaultValue);
+      const hasNameChange = exerciseNameInput.value.trim() !== originalExerciseName.trim();
+      if (hasSetChanges || hasNameChange) {
+        saveChangesButton.classList.remove("d-none"); // Show button
+      } else {
+        saveChangesButton.classList.add("d-none"); // Hide button
+      }
+    };
+
+    // Add event listeners for changes
+    exerciseNameInput.addEventListener("input", toggleSaveButton);
+    inputs.forEach((input) => {
+      input.addEventListener("input", toggleSaveButton);
+    });
+  });
+</script>
+
 {% endblock content %}

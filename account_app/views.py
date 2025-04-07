@@ -24,7 +24,7 @@ def login_user(request):
         user = authenticate(request, username=username, password=password)
         if user is not None:
             login(request, user)
-            messages.success(request, "You have been authenticated and successfully logged in.")
+            messages.success(request, "Login Successful!")
             return redirect("dashboard")
         else:
             messages.success(request, "This username or password is incorrect.")
@@ -58,13 +58,23 @@ def create_user(request):
         'form':form,
         })
     
+from django.shortcuts import render, get_object_or_404, redirect
+from .models import Info
+from .forms import InfoForm
+
 def my_info(request):
-    info = get_object_or_404(Info, user=request.user)
-    
+    try:
+        # Try to fetch the existing Info object for the user
+        info = Info.objects.get(user=request.user)
+    except Info.DoesNotExist:
+        # If it doesn't exist, create a new one
+        info = Info(user=request.user)
+
     if request.method == 'POST':
         form = InfoForm(request.POST, instance=info)
         
         if form.is_valid():
+            # Set completion status and determine redirect
             if info.has_completed:
                 direction = 'dashboard'
             else:

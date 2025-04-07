@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+{% block title %}My Workouts{% endblock title %}
+{%block topleft %}
+<a href="javascript:window.history.back()" class="btn btn-warning">Back</a>
+{% endblock topleft %} {% block center %}
+<a href="{% url 'start_workout' %}" class="btn btn-warning btn"
+  >Start New Workout</a
+>
+{% endblock center %} {% block content %}
+<div class="container">
+  {% if workouts %}
+  <div class="row gy-3">
+    {% for w in workouts %}
+    <div class="col-12">
+      <div
+        class="d-flex justify-content-between align-items-center p-3 bg-secondary rounded"
+      >
+        <!-- Workout Details -->
+        <div class="p-2">
+          <h5 class="text-warning">{{ w.workout_name }}</h5>
+          <p class="mb-0">Date: {{ w.date }}</p>
+        </div>
+
+        <!-- Exercise List -->
+        <div>
+          {% if w.exercise_set.all %}
+          <h6 class="text-warning mb-1">Exercises:</h6>
+          {% for exercise in w.exercise_set.all %}
+          <p class="mb-0">&bull; {{ exercise.exercise_name }}</p>
+          {% endfor %} {% else %}
+          <h6 class="text-warning">No Exercises</h6>
+          {% endif %}
+        </div>
+
+        <!-- Dropdown for Options -->
+        <div>
+          <div class="dropdown">
+            <button
+              class="btn btn-secondary dropdown-toggle"
+              type="button"
+              id="dropdownMenuButton{{ w.workout_id }}"
+              data-bs-toggle="dropdown"
+              aria-expanded="false"
+            >
+              Options
+            </button>
+            <ul
+              class="dropdown-menu dropdown-menu-end"
+              aria-labelledby="dropdownMenuButton{{ w.workout_id }}"
+            >
+              <li>
+                <a
+                  class="dropdown-item text-warning"
+                  href="{% url 'workout_details' w.workout_id %}"
+                >
+                  View Details
+                </a>
+              </li>
+              <li>
+                <a
+                  class="dropdown-item text-danger"
+                  href="#"
+                  data-bs-toggle="modal"
+                  data-bs-target="#deleteConfirmationModal"
+                  data-delete-url="{% url 'delete_workout' w.workout_id %}"
+                >
+                  Delete
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="text-center text-light mt-5">
+    <p>
+      No workouts found. Click
+      <span class="text-warning">"Start Workout"</span> to begin tracking your
+      fitness journey!
+    </p>
+  </div>
+  {% endif %}
+</div>
+{% endblock content %}

@@ -1,36 +1,51 @@
 {% extends 'base.html' %}
-{% block title %} Dashboard {% endblock title%}
+{% block title %} Dashboard {% endblock title %}
+
 {% block topleft %}
 <h4>Hello, {{ user.username|title }}</h4>
 {% endblock topleft %}
+
 {% block topright %}
-<a href="{% url 'workout_home' %}" class="btn btn-primary btn">My Workouts</a>
+<a href="{% url 'workout_list' %}" class="btn btn-primary">My Workouts</a>
 {% endblock topright %}
+
 {% block content %}
-<div class="row text-center g-2">
-    <div class="col border ">
-        <h3>Recent Workouts</h3>
+<div class="container">
+
+  <div class="row gy-4">
+
+    <!-- Recent Workouts Column -->
+    <div class="col-md-6">
+      <div class="bg-secondary p-3 rounded h-100">
+        <h3 class="text-warning mb-3">Recent Workouts</h3>
         {% if recent_workouts %}
-        {% for workout in recent_workouts %}
-        <div class="card h-100">
-            <div class="card-body d-flex justify-content-between align-items-center">
-                <div>
-                    <h5 class="card-title">{{ workout.workout_name }}</h5>
-                    <p class="card-text">{{ workout.date }}</p>
-                </div>
-                <a href="{% url 'workout_details' workout.workout_id %}" class="btn btn-primary btn-sm">View
-                    Details</a>
+          {% for workout in recent_workouts|slice:":5" %}
+          <div class="d-flex justify-content-between align-items-center bg-dark rounded p-3 mb-2">
+            <div>
+              <h5 class="text-warning mb-1">{{ workout.workout_name }}</h5>
+              <p class="mb-0">Date: {{ workout.date }}</p>
             </div>
-        </div>
-        {% endfor %}
+            <a href="{% url 'workout_details' workout.workout_id %}" class="btn btn-sm btn-outline-light">View</a>
+          </div>
+          {% endfor %}
         {% else %}
-        <p>No recent workouts found.</p>
+          <p class="text-light">No recent workouts found.</p>
         {% endif %}
+      </div>
     </div>
 
-    <div class="col border">
-        <h3>Calories Section</h3>
+    <!-- Placeholder for Recent Meals Column -->
+    <div class="col-md-6">
+      <div class="bg-secondary p-3 rounded h-100">
+        <h3 class="text-warning mb-3">Recent Meals</h3>
+        {% comment %} This section will display recent meals when available {% endcomment %}
+        <div class="text-light">
+          <p class="mb-0">Nutrition tracking coming soon...</p>
+          <p class="fst-italic">You’ll be able to view your last 3 meals here once your nutrition setup is ready.</p>
+        </div>
+      </div>
     </div>
+
+  </div>
 </div>
-
 {% endblock content %}

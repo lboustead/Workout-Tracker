@@ -10,7 +10,11 @@ from datetime import datetime, timedelta
 from django.contrib import messages
 
 def home(request, date=None):
-    user_info = Info.objects.get(user=request.user)
+    try:
+        user_info = Info.objects.get(user=request.user)
+    except:
+        messages.info(request, "You must fill out more information first.")
+        return redirect('my_info')
     
     if user_info.has_completed:
         today = timezone.localtime().date()

@@ -1,50 +1,118 @@
-{% extends 'base.html' %}
+{% extends 'base.html' %} 
 
-{% block title %} Workout Details {% endblock title %}
+<!--Page Title-->
+{% block title %}Workout Details{% endblock title %}
 
+{% block action %}Delete{% endblock action %}
+
+{% block confirmation_text %}
+  Are you sure you want to go back? Your workout will be deleted because it has no exercises.
+{% endblock confirmation_text %}
+
+<!--top left content-->
 {% block topleft %}
-<a href="{% url 'workout_home' %}" class="btn btn-primary btn">Back</a>
+{% if exercises %}
+<a href="javascript:window.history.back()" class="btn btn-warning">Back</a>
+
+{% else %}
+<a href="#" class="btn btn-warning" 
+   data-bs-toggle="modal" 
+   data-bs-target="#deleteConfirmationModal" 
+   data-delete-url="{% url 'delete_workout' workout.workout_id %}">
+   Back
+</a>
+{% endif %}
 {% endblock topleft %}
 
-{% block topright %}
-<a href="{% url 'add_exercise' workout.workout_id %}" class="btn btn-primary btn">Add Exercise</a>
-{% endblock topright %}
-
+<!--top center block-->
 {% block center %}
-Workout: {{ workout.workout_name }}
-{% endblock center %}
+<form method="POST" id="workout-form">
+  {% csrf_token %}
+  <div class="d-flex align-items-center">
+    <!-- Editable Workout Name -->
+    <input type="text" name="workout_name" id="workout_name" class="form-control bg-transparent text-warning border-0 p-0 ps-1 ms-1 text-center" value="{{ workout.workout_name }}" style="font-size: 1.75rem; font-weight: bold; width: auto" required />
 
+    <!-- Save Changes Button -->
+    <button type="submit" name="save_changes" class="btn btn-success d-none ms-3" id="save-changes-btn">Save</button>
+  </div>
+{% endblock center%}
+
+<!--main content-->
 {% block content %}
-{% if exercises %}
-    {% for e in exercises %}
-        <div style="padding: 10px">
-            <div class="card workout_card">
-                <div class="card-body">
-                    <div class="row justify-content-between p-1">
-                        <div class="col-auto">
-                            <h4 class="card-title">{{ e.exercise_name }}</h4>
-                            <p>{{ workout.date }}</p>
-							<p>Total Sets: {{ e.set_count }}</p>
-                            <p>Total Volume: {{ e.volume }}</p>
-                            
-                        </div>
-                        <div class="col-auto">
-                            {% for set in e.sets_set.all %}
-                                <h6>{{ set.weight }} lbs x {{ set.reps }} reps</h6>
-                            {% endfor %}
-                        </div>
-                        <div class="col-auto justify-content-end">
-                            <div class="d-flex flex-column p-2">
-                                <a href="{% url 'exercise_details' e.exercise_id %}" class="btn btn-primary btn-sm mb-2">Edit Exercise</a>
-                                <a href="{% url 'delete_exercise' e.exercise_id %}" class="btn btn-danger btn-sm">Remove</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+<!-- Workout Name Section -->
+<div class="container mt-4">
+    <!-- Section of current exercise data -->
+    <div class="row gy-3">
+      {% if exercises %} {% for e in exercises %}
+      <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center p-3 bg-secondary text-light rounded shadow-sm">
+          <div class="p-2">
+            <h5 class="text-warning">{{ e.exercise_name }}</h5>
+            <p class="mb-0">Total Sets: <strong>{{ e.set_count }}</strong></p>
+            <p class="mb-0">Total Volume: <strong>{{ e.volume }}</strong></p>
+          </div>
+          <div>
+            {% for set in e.sets_set.all %}
+            <p class="mb-1"><strong>{{ set.weight }}</strong> lbs x <strong>{{ set.reps }}</strong> reps</p>
+            {% endfor %}
+          </div>
+          <div>
+            <!-- Dropdown for Options -->
+            <div class="dropdown">
+              <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton{{ e.exercise_id }}" data-bs-toggle="dropdown" aria-expanded="false">Options</button>
+              <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton{{ e.exercise_id }}">
+                <li>
+                  <a class="dropdown-item text-warning" href="{% url 'exercise_details' e.exercise_id %}"> View Details </a>
+                </li>
+                <li>
+                  <a class="dropdown-item text-danger" href="{% url 'delete_exercise' e.exercise_id %}"> Delete </a>
+                </li>
+              </ul>
             </div>
+          </div>
         </div>
-    {% endfor %}
-{% else %}
-    <h4 style="text-align: center">You have no exercises</h4>
-{% endif %}
+      </div>
+      {% endfor %} {% endif %}
+    </div>
+  </form>
+</div>
+
+<!-- Add Exercise Form -->
+<div class="container my-4">
+  <h3 class="text-warning ms-2">Add Exercise</h3>
+  <form method="POST" class="bg-secondary text-light p-4 rounded shadow-sm">
+    {% csrf_token %}
+    <div class="row mb-3">
+      <div class="col">
+        <input type="text" name="exercise_name" id="exercise_name" class="form-control bg-dark text-light border-secondary" placeholder="Exercise Name" required />
+      </div>
+    </div>
+    <div class="d-flex justify-content-center mt-3">
+      <button type="submit" name="add_exercise" class="btn btn-success">Save</button>
+    </div>
+  </form>
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const saveChangesButton = document.getElementById("save-changes-btn");
+    const workoutNameInput = document.getElementById("workout_name");
+
+    // Store the original workout name to compare
+    const originalWorkoutName = workoutNameInput.value;
+
+    // Function to toggle the Save Changes button
+    const toggleSaveButton = () => {
+      if (workoutNameInput.value.trim() !== originalWorkoutName.trim()) {
+        saveChangesButton.classList.remove("d-none"); // Show button
+      } else {
+        saveChangesButton.classList.add("d-none"); // Hide button
+      }
+    };
+
+    // Add event listener to detect changes in the workout name input
+    workoutNameInput.addEventListener("input", toggleSaveButton);
+  });
+</script>
+
 {% endblock content %}

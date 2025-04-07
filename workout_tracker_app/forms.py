@@ -3,12 +3,16 @@ from .models import Workout, Exercise, Sets
 from django.forms.widgets import NumberInput
 
 class AddWorkoutForm(forms.ModelForm):
-    workout_name = forms.CharField(required=True, label="", widget=forms.widgets.TextInput(
+    workout_name = forms.CharField(
+        required=True, 
+        label="", 
+        widget=forms.widgets.TextInput(
         attrs={"class": "form-control", "placeholder": "Workout Name"}))
-    date = forms.DateTimeField(label="", required=True, widget=NumberInput(attrs={'type':'date'}))
+    
     class Meta:
         model = Workout
-        exclude = ('username',)
+        exclude = ('user', 'date', 'calories_burned')
+        fields = ['workout_name']
     
 class AddExerciseForm(forms.ModelForm):
     #workout = forms.IntegerField
@@ -16,18 +20,15 @@ class AddExerciseForm(forms.ModelForm):
         attrs={"class": "form-control", "placeholder": "Exercise"}))
     class Meta:
         model = Exercise
-        exclude = ('workout','volume')
+        exclude = ('workout',)
+        fields = ['exercise_name']
         
 class AddSetForm(forms.ModelForm):
     weight = forms.FloatField(required=True, label="", widget=forms.widgets.TextInput(
-        attrs={"class": "form-control", "placeholder": "weight"}))
+        attrs={"class": "form-control bg-dark text-light border-secondary", "placeholder": "Weight (lbs)"}))
     reps = forms.IntegerField(required=True, label="", widget=forms.widgets.TextInput(
-        attrs={"class": "form-control", "placeholder": "reps"}))
+        attrs={"class": "form-control bg-dark text-light border-secondary", "placeholder": "Reps"}))
     class Meta:
         model = Sets
         exclude = ('exercise', 'set')
-        fields =[
-            "weight",
-            "reps"
-        ]
-        
+        fields =["weight", "reps"]
