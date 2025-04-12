@@ -5,26 +5,18 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.shortcuts import render, redirect
 from .forms import *
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseBadRequest, HttpResponseRedirect
 from django.db.models import Count
 from django.contrib.auth.forms import *
 from django.db.models import Count, Sum
 from django.utils import timezone
-
-
-# Create your views here.
-def start_workout(request):
-    temp_form = AddWorkoutForm(request.POST or None)
-    if request.method == "POST":
-        if temp_form.is_valid():
-            form = temp_form.save(commit=False)
-            form.user = request.user
-            form.date = timezone.localtime().date()
-            form.save()
-            messages.success(request, "New Workout Created")
-            return HttpResponseRedirect(reverse(workout_details, args=(form.pk,)))
-    else:
-        return render(request, "workout_tracker_app/start_workout.html", {"form": temp_form})
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.timezone import now
+from datetime import timedelta
+from django.shortcuts import get_object_or_404, redirect
+from django.utils import timezone
+        
 
 def delete_workout(request, pk):
     record = Workout.objects.get(pk=pk)
@@ -49,7 +41,7 @@ def delete_set(request, pk):
 
 def workout_list(request):
     workouts = Workout.objects.filter(user=request.user).annotate(
-    ).order_by('-date')[:10]
+    ).order_by('-date', '-start_time')[:10]
     return render(request, 'workout_tracker_app/workout_list.html', {'workouts': workouts})
 
 def workout_details(request, pk):
@@ -150,13 +142,51 @@ def exercise_details(request, exercise_pk):
 
 from datetime import timedelta
 
+# Create your views here.
+def start_workout(request):
+    workout = Workout.objects.create(
+            workout_name=f"Workout {timezone.localtime().strftime('%m-%d-%Y')}",
+            user=request.user,
+            date=timezone.localtime().date(),
+            start_time = timezone.now(),
+            last_active_time = timezone.now(),
+        )
+    messages.success(request, "New Workout Created")
+    return redirect('workout_details', pk=workout.pk)
+
+def pause_workout(request, workout_id):
+    workout = get_object_or_404(Workout, pk=workout_id)
+
+    if workout.last_active_time and not workout.is_completed:
+        now = timezone.now()
+        workout.active_seconds += int((now - workout.last_active_time).total_seconds())
+        workout.last_active_time = None
+        workout.save()
+
+    return redirect('workout_details', pk=workout_id)
+
+def resume_workout(request, workout_id):
+    workout = get_object_or_404(Workout, pk=workout_id)
+
+    if workout.last_active_time is None and not workout.is_completed:
+        workout.last_active_time = timezone.now()
+        workout.save()
+
+    return redirect('workout_details', pk=workout_id)
+
 def end_workout(request, workout_id):
-    workout = get_object_or_404(Workout, id=workout_id)
+    workout = get_object_or_404(Workout, pk=workout_id)
 
-    # Get the timer duration from the form
-    timer_duration = request.POST.get("timer_duration")
-    if timer_duration:
-        workout.duration = timedelta(seconds=int(timer_duration))
+    if request.method == 'POST':
+        if workout.last_active_time:
+            now = timezone.now()
+            workout.active_seconds += int((now - workout.last_active_time).total_seconds())
+            workout.last_active_time = None
 
-    workout.save()
-    return redirect('workout_list')
+        workout.is_completed = True
+        workout.save()
+        return redirect('workout_list')
+
+
+
+

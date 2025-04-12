@@ -2,56 +2,57 @@
 {% block title %}My Info{% endblock title %}
 {% block content %}
 <div class="container">
-    <h1>Account Information</h1>
+    <div class="text-center">
+        <h1 class="text-warning">Account Information</h1>
+    </div>
+    
     <form method="post" id="info-form">
         {% csrf_token %}
         
-        <div class="mb-3">
+        <div class="mb-3 text-warning">
             {{ form.current_weight.label_tag }} <span id="current_weight">{{ form.current_weight }}</span>
         </div>
-        <div class="mb-3">
+        <div class="mb-3 text-warning">
             {{ form.goal_weight.label_tag }} <span id="goal_weight">{{ form.goal_weight }}</span>
         </div>
-        <div class="mb-3">
-            {{ form.height.label_tag }} <span id="height">{{ form.height }}</span>
+        <div class="mb-3 text-warning">
+            <label for="id_height_feet">Height</label>
+            <div class="d-flex align-items-center">
+                {{ form.height_feet }} <span class="mx-2">ft</span>
+                {{ form.height_inches_remainder }} <span class="mx-2">inches</span>
+            </div>
         </div>
-        <div class="mb-3">
+        
+        <div class="mb-3 text-warning">
             {{ form.age.label_tag }} <span id="age">{{ form.age }}</span>
         </div>
-        <div class="mb-3">
+        <div class="mb-3 text-warning">
             {{ form.gender.label_tag }} <span id="gender">{{ form.gender }}</span>
         </div>
-        <div class="mb-3">
+        <div class="mb-3 text-warning">
             {{ form.activity_level.label_tag }} <span id="activity_level">{{ form.activity_level }}</span>
         </div>
         
         <!-- Display weight_goal and weight_goal_pounds in the same row -->
-        <div class="row mb-3">
-            <div class="col-auto">
-                <div class="form-group">
-                    {{ form.weight_goal.label_tag }} {{ form.weight_goal }}
-                </div>
-            </div>
-            <div class="col-auto">
-                <div class="form-group">
-                    Goal Lbs./Week: {{ form.weight_goal_pounds }}
-                </div>
+
+        <div class="mb-3 text-warning">
+            <div class="form-group">
+                Goal Lbs./Week: {{ form.weight_goal_pounds }}
             </div>
         </div>
-        
-        <div class="mb-3">
-            Recommended Calories: <span id="recommended-calories">{{ recommended_calories }}</span>
+
+        <div class="card mb-3 border-warning shadow-sm">
+            <div class="card-body text-center">
+              <h5 class="card-title text-dark mb-2">🎯 Recommended Daily Calories</h5>
+              <h2 class="fw-bold text-warning" id="recommended-calories">{{ recommended_calories }}</h2>
+              <p class="text-muted mb-0">Based on your weight, age, height, and activity level.</p>
+            </div>
         </div>
-        
-        <div class="mb-3">
+          
+        <div class="mb-3 text-warning">
             {{ form.calorie_intake.label_tag }} <span id="calorie_intake">{{ form.calorie_intake }}</span>
         </div>
-
-        <!-- Button to use recommended calories -->
-        <button type="button" class="btn btn-secondary" id="use-recommended-calories">
-            Use recommended calories
-        </button>
-
+        
         <button type="submit" class="btn btn-primary">Save</button>
     </form>
 </div>
@@ -68,15 +69,16 @@
             // Retrieve values from relevant form fields
             var currentWeight = parseFloat(document.getElementById("id_current_weight").value);
             var goalWeight = parseFloat(document.getElementById("id_goal_weight").value);
-            var height = parseFloat(document.getElementById("id_height").value);
+            var heightFeet = parseFloat(document.getElementById("id_height_feet").value) || 0;
+            var heightInches = parseFloat(document.getElementById("id_height_inches_remainder").value) || 0;
+            var height = heightFeet * 12 + heightInches;
             var age = parseInt(document.getElementById("id_age").value);
             var gender = document.getElementById("id_gender").value;
             var activityLevel = document.getElementById("id_activity_level").value; // Retrieve as string
-            var weightGoal = document.getElementById("id_weight_goal").value;
             var weightGoalPounds = parseFloat(document.getElementById("id_weight_goal_pounds").value);
 
             // Perform calculation based on retrieved values (replace with your calculation logic)
-            var calculatedCalories = calculateRecommendedCalories(currentWeight, goalWeight, height, age, gender, activityLevel, weightGoal, weightGoalPounds);
+            var calculatedCalories = calculateRecommendedCalories(currentWeight, goalWeight, height, age, gender, activityLevel, weightGoalPounds);
 
             // Update recommended calories display
             recommendedCaloriesSpan.textContent = calculatedCalories;
@@ -88,13 +90,13 @@
 
         // Attach event listeners to relevant form fields
         form.addEventListener("input", function(event) {
-            if (event.target.matches("#id_current_weight, #id_goal_weight, #id_height, #id_age, #id_gender, #id_activity_level, #id_weight_goal, #id_weight_goal_pounds")) {
+            if (event.target.matches("#id_current_weight, #id_goal_weight, #id_height_feet, #id_height_inches_remainder, #id_age, #id_gender, #id_activity_level, #id_weight_goal_pounds")) {
                 updateRecommendedCalories();
             }
         });
 
         // Function to calculate recommended calories (replace with your own logic)
-        function calculateRecommendedCalories(currentWeight, goalWeight, height, age, gender, activityLevel, weightGoal, weightGoalPounds) {
+        function calculateRecommendedCalories(currentWeight, goalWeight, height, age, gender, activityLevel, weightGoalPounds) {
             var kilogram = currentWeight * 0.453592; // Convert pounds to kilograms
             var centimeter = height * 2.54; // Convert inches to centimeters
             var BMR_male = 13.397 * kilogram + 4.799 * centimeter - 5.677 * age + 88.362;
@@ -117,26 +119,11 @@
                 calories *= 1.725;
             }
 
-            if (weightGoal === 'maintain') {
-                document.getElementById("id_weight_goal_pounds").value = 0.0;
-                document.getElementById("id_weight_goal_pounds").disabled = true;
-            } else if (weightGoal === 'lose') {
-                calories -= (weightGoalPounds * 500);
-                document.getElementById("id_weight_goal_pounds").disabled = false;
-            } else if (weightGoal === 'gain') {
-                calories += (weightGoalPounds * 500);
-                document.getElementById("id_weight_goal_pounds").disabled = false;
+            if (!isNaN(weightGoalPounds)) {
+                calories += weightGoalPounds * 500; // Subtract for negative, add for positive
             }
 
             return Math.round(calories); // Round calories to nearest whole number
-        }
-
-        // Button to use recommended calories
-        var useRecommendedButton = document.getElementById("use-recommended-calories");
-        if (useRecommendedButton && calorieIntakeField) {
-            useRecommendedButton.addEventListener("click", function() {
-                calorieIntakeField.value = recommendedCaloriesSpan.textContent;
-            });
         }
     });
 </script>

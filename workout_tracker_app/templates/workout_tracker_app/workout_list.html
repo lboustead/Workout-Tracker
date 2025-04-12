@@ -1,33 +1,73 @@
 {% extends 'base.html' %}
+{% load time_filters%}
+
 {% block title %}My Workouts{% endblock title %}
-{%block topleft %}
+
+{% comment %} {%block topleft %}
 <a href="javascript:window.history.back()" class="btn btn-warning">Back</a>
-{% endblock topleft %} {% block center %}
-<a href="{% url 'start_workout' %}" class="btn btn-warning btn"
-  >Start New Workout</a
->
-{% endblock center %} {% block content %}
+{% endblock topleft %} {% endcomment %}
+
+{% block center %}
+  <a
+      class="btn btn-warning btn"
+      href="#"
+      data-bs-toggle="modal"
+      data-bs-target="#confirmationModal"
+      data-action-url="{% url 'start_workout' %}"
+      data-title="Start New Workout"
+      data-message="Are you sure you want to start a workout?"
+      data-button="Start"
+    >
+      Start New Workout
+    </a>
+{% endblock center %}
+
+{% block content %}
 <div class="container">
   {% if workouts %}
-  <div class="row gy-3">
+  <div class="row gy-4">
     {% for w in workouts %}
     <div class="col-12">
-      <div
-        class="d-flex justify-content-between align-items-center p-3 bg-secondary rounded"
-      >
+
+      <!--Warning border if workout is not finished-->
+      {% with status=w.status %}
+      <div class="d-flex justify-content-between align-items-center p-3 rounded border border-2
+        {% if status == 'completed' %}
+          border-success
+       {% elif status == 'active' %}
+          border-primary
+        {% elif status == 'paused' %}
+          border-warning
+        {% endif %}
+        bg-secondary
+      ">
+      {% endwith %}
+
         <!-- Workout Details -->
         <div class="p-2">
-          <h5 class="text-warning">{{ w.workout_name }}</h5>
-          <p class="mb-0">Date: {{ w.date }}</p>
+          <h5 class="text-warning">
+            {{ w.workout_name }}
+          </h5>
+          {% load time_filters %}
+
+          {% if w.is_completed %}
+            <p class="mb-0">Duration: {{ w.active_seconds|duration_hms }}</p>
+          {% else %}
+            <p class="mb-0">Time So Far: {{ w.get_elapsed_time|duration_hms }}</p>
+          {% endif %}
+
+          <span class="fst-italic">{{ w.status }}</span>
+
         </div>
 
         <!-- Exercise List -->
         <div>
           {% if w.exercise_set.all %}
-          <h6 class="text-warning mb-1">Exercises:</h6>
+          <h5 class="text-warning mb-1">Exercises:</h5>
           {% for exercise in w.exercise_set.all %}
           <p class="mb-0">&bull; {{ exercise.exercise_name }}</p>
-          {% endfor %} {% else %}
+          {% endfor %} 
+          {% else %}
           <h6 class="text-warning">No Exercises</h6>
           {% endif %}
         </div>
@@ -44,30 +84,44 @@
             >
               Options
             </button>
-            <ul
-              class="dropdown-menu dropdown-menu-end"
-              aria-labelledby="dropdownMenuButton{{ w.workout_id }}"
-            >
-              <li>
-                <a
-                  class="dropdown-item text-warning"
-                  href="{% url 'workout_details' w.workout_id %}"
-                >
-                  View Details
-                </a>
-              </li>
+            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton{{ w.workout_id }}">
+
+              {% if w.is_completed %}
+                <li>
+                  <a class="dropdown-item text-success" href="{% url 'workout_details' w.workout_id %}">
+                    View Details
+                  </a>
+                </li>
+              {% elif w.last_active_time %}
+                <li>
+                  <a class="dropdown-item text-success" href="{% url 'workout_details' w.workout_id %}">
+                    Continue Workout
+                  </a>
+                </li>
+              {% else %}
+                <li>
+                  <a class="dropdown-item text-success" href="{% url 'resume_workout' w.workout_id %}">
+                    Resume Workout
+                  </a>
+                </li>
+              {% endif %}
+            
               <li>
                 <a
                   class="dropdown-item text-danger"
                   href="#"
                   data-bs-toggle="modal"
-                  data-bs-target="#deleteConfirmationModal"
-                  data-delete-url="{% url 'delete_workout' w.workout_id %}"
+                  data-bs-target="#confirmationModal"
+                  data-action-url="{% url 'delete_workout' w.workout_id %}"
+                  data-title="Delete Workout"
+                  data-message="Are you sure you want to delete this workout? This action cannot be undone."
+                  data-button="Delete"
                 >
-                  Delete
+                  Delete Workout
                 </a>
               </li>
             </ul>
+            
           </div>
         </div>
       </div>

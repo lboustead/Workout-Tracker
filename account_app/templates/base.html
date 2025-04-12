@@ -20,7 +20,9 @@
 <body class="text-light bg-dark d-flex flex-column min-vh-100">
 
     {% include 'navbar.html' %}
-   
+    <!-- Spacer div to push content below the fixed navbar -->
+    <div style="height: 73px;"></div>
+
     <!-- Message Creation -->
     <div class="container">
         {% if messages %}
@@ -34,47 +36,58 @@
     </div>
 
     <!-- Top Navigation Format -->
-    <div class="row justify-content-between align-items-center text-light m-4">
-        <div class="col-auto">
-            {% block topleft %}{% endblock topleft %}
+    <div class="d-flex align-items-center text-light m-4 position-relative">
+
+        <!-- Top Left -->
+        <div class="position-absolute start-0">
+          {% block topleft %}{% endblock topleft %}
         </div>
-        <div class="col-auto text-center">
-            {% block center %}{% endblock center %}
+      
+        <!-- Center -->
+        <div class="mx-auto text-center">
+          {% block center %}{% endblock center %}
         </div>
-        <div class="col-auto">
-            {% block topright %}{% endblock topright %}
+      
+        <!-- Top Right -->
+        <div class="position-absolute end-0">
+          {% block topright %}{% endblock topright %}
         </div>
-    </div>
-    
+      
+      </div>
 
     <!-- Main Content -->
     <div class="content container-fluid mb-4 flex-fill">
         {% block content %}{% endblock content %}
     </div>
 
-    <!-- Delete Confirmation Modal -->
-<div class="modal fade" id="deleteConfirmationModal" tabindex="-1" aria-labelledby="deleteConfirmationLabel" aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content bg-secondary text-light">
-        <div class="modal-header">
-          <h5 class="modal-title text-warning" id="deleteConfirmationLabel">Confirm {% block action %}Deletion{% endblock action %}</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-            {% block confirmation_text %}
-              Are you sure you want to delete? This action cannot be undone.
-            {% endblock confirmation_text%}
-          </div>
-        <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-            <form method="POST" id="deleteForm">
+    <!-- Confirmation Modal -->
+    <div class="modal fade" id="confirmationModal" tabindex="-1" aria-labelledby="confirmationModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content bg-secondary text-light text-center">
+            <div class="modal-header">
+              <h5 class="modal-title text-warning" id="confirmationModalLabel">
+                {% block confirmation_title %}Please Confirm{% endblock confirmation_title %}
+              </h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              {% block confirmation_text %}
+                Are you sure you want to proceed with this action?
+              {% endblock confirmation_text %}
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+              <form method="POST" id="confirmationForm">
                 {% csrf_token %}
-                <button type="submit" class="btn btn-danger">Confirm</button>
-            </form>
+                <button type="submit" class="btn btn-warning">
+                  {% block confirmation_button_text %}Confirm{% endblock confirmation_button_text %}
+                </button>
+              </form>
+            </div>
+          </div>
         </div>
-        </div>
-    </div>
-  </div>
+      </div>
+      
   
 
     <!-- Footer -->
@@ -86,7 +99,7 @@
     <script type="text/javascript">
         $(document).ready(function () {
             window.setTimeout(function () {
-                $(".alert").slideUp(500, function () {
+                $(".alert").slideUp(1000, function () {
                     $(this).remove();
                 });
             }, 2000);
@@ -95,27 +108,32 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-        var deleteConfirmationModal = document.getElementById('deleteConfirmationModal');
-        var deleteForm = document.getElementById('deleteForm');
-
-        deleteConfirmationModal.addEventListener('show.bs.modal', function (event) {
-            var triggerElement = event.relatedTarget; // Button that triggered the modal
-            var deleteUrl = triggerElement.getAttribute('data-delete-url'); // Get the delete URL
-
-            // Debugging: Log the delete URL to confirm it's being set
-            console.log("Delete URL:", deleteUrl);
-
-            if (deleteUrl) {
-                deleteForm.action = deleteUrl; // Set the form action dynamically
-            } else {
-                console.error("No delete URL found!");
-            }
+            const confirmationModal = document.getElementById('confirmationModal');
+            const confirmationForm = document.getElementById('confirmationForm');
+            const confirmationTitle = confirmationModal.querySelector('.modal-title');
+            const confirmationBody = confirmationModal.querySelector('.modal-body');
+            const confirmationButton = confirmationModal.querySelector('button[type="submit"]');
+        
+            confirmationModal.addEventListener('show.bs.modal', function (event) {
+                const trigger = event.relatedTarget;
+        
+                // Get custom attributes from the trigger button
+                const actionUrl = trigger.getAttribute('data-action-url');
+                const title = trigger.getAttribute('data-title') || 'Please Confirm';
+                const message = trigger.getAttribute('data-message') || 'Are you sure you want to proceed with this action?';
+                const buttonLabel = trigger.getAttribute('data-button') || 'Confirm';
+                
+                // Set modal values
+                confirmationForm.action = actionUrl;
+                confirmationTitle.textContent = title;
+                confirmationBody.textContent = message;
+                confirmationButton.textContent = buttonLabel;
+            });
+        
+            confirmationForm.addEventListener('submit', function (e) {
+                console.log("Confirmation form submitted to:", this.action);
+            });
         });
-    });
-
-    document.getElementById('deleteForm').addEventListener('submit', function (e) {
-        console.log("Form is being submitted to:", this.action);
-    });
     </script>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>

@@ -1,9 +1,14 @@
 {% extends 'base.html' %}
+
 {% block title %} Dashboard {% endblock title %}
 
 {% block topleft %}
-<h4>Hello, {{ user.username|title }}</h4>
+<h5>Hello, {{ user.username|title }}</h5>
 {% endblock topleft %}
+
+{% block center%}
+<h3> My Dashboard</h3>
+{% endblock center%}
 
 {% block topright %}
 <a href="{% url 'workout_list' %}" class="btn btn-primary">My Workouts</a>
@@ -11,19 +16,17 @@
 
 {% block content %}
 <div class="container">
-
   <div class="row gy-4">
-
     <!-- Recent Workouts Column -->
     <div class="col-md-6">
-      <div class="bg-secondary p-3 rounded h-100">
+      <div class="bg-secondary p-3 rounded h-100 border border-warning text-warning">
         <h3 class="text-warning mb-3">Recent Workouts</h3>
         {% if recent_workouts %}
           {% for workout in recent_workouts|slice:":5" %}
           <div class="d-flex justify-content-between align-items-center bg-dark rounded p-3 mb-2">
             <div>
               <h5 class="text-warning mb-1">{{ workout.workout_name }}</h5>
-              <p class="mb-0">Date: {{ workout.date }}</p>
+              <p class="mb-0 text-light">Date: {{ workout.date }}</p>
             </div>
             <a href="{% url 'workout_details' workout.workout_id %}" class="btn btn-sm btn-outline-light">View</a>
           </div>
@@ -36,8 +39,8 @@
 
     <!-- Placeholder for Recent Meals Column -->
     <div class="col-md-6">
-      <div class="bg-secondary p-3 rounded h-100">
-        <h3 class="text-warning mb-3">Recent Meals</h3>
+      <div class="bg-secondary p-3 rounded h-100 border border-info text-info">
+        <h3 class="mb-3">Recent Meals</h3>
         {% comment %} This section will display recent meals when available {% endcomment %}
         <div class="text-light">
           <p class="mb-0">Nutrition tracking coming soon...</p>

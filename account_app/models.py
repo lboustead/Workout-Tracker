@@ -7,7 +7,7 @@ class Info(models.Model):
     current_weight = models.FloatField()
     goal_weight = models.FloatField()
     calorie_intake = models.IntegerField(blank=True, null=True)
-    height = models.FloatField()
+    height_inches = models.FloatField()
     age = models.IntegerField(default=40)
     gender = models.CharField(max_length=1, choices=(('M', 'Male'), ('F','Female')), default='M')
     activity_level = models.CharField(max_length=1, choices=(
@@ -23,6 +23,18 @@ class Info(models.Model):
     ), default='maintain')
     weight_goal_pounds = models.DecimalField(max_digits=5, decimal_places=1, blank=True, null=True)
 
+    def get_height_feet_inches(self):
+        feet = int(self.height_inches) // 12
+        inches = int(self.height_inches) % 12
+        return feet, inches
 
+    def get_height_display(self):
+        feet, inches = self.get_height_feet_inches()
+        return f"{feet}' {inches}″"
+    
     def __str__(self):
         return f"Username: {self.user}"
+    
+    class Meta:
+        verbose_name = "Info"
+        verbose_name_plural = "Info"

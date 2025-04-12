@@ -17,6 +17,10 @@ class Food(models.Model):
 
     def __str__(self):
         return f"{self.name} serving size of {self.serving_size} has {self.calories} Calories"
+    
+    class Meta:
+        verbose_name = "Food"
+        verbose_name_plural = "Foods"
 
 class MealEntry(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -27,4 +31,8 @@ class MealEntry(models.Model):
 
     def __str__(self):
         return f"{self.food.name} - {self.food.protein*self.servings}g protein - {self.food.fat*self.servings}g fat - {self.food.carbs*self.servings}g carbs - {self.servings} Servings - {self.food.calories*self.servings} Calories"
+    
+    class Meta:
+        verbose_name = "MealEntry"
+        verbose_name_plural = "MealEntries"
 

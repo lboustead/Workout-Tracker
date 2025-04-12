@@ -1,4 +1,4 @@
-{% extends 'base.html' %} 
+{% extends 'base.html' %}
 
 <!--Page Title-->
 {% block title %}Workout Details{% endblock title %}
@@ -6,23 +6,32 @@
 {% block action %}Delete{% endblock action %}
 
 {% block confirmation_text %}
-  Are you sure you want to go back? Your workout will be deleted because it has no exercises.
+  Are you sure you want end the workout?
 {% endblock confirmation_text %}
 
 <!--top left content-->
 {% block topleft %}
-{% if exercises %}
-<a href="javascript:window.history.back()" class="btn btn-warning">Back</a>
-
+{% if workout.status == 'completed' %}
+<a href="{% url 'workout_list' %}" class="btn btn-warning ms-2">Back</a>
 {% else %}
-<a href="#" class="btn btn-warning" 
-   data-bs-toggle="modal" 
-   data-bs-target="#deleteConfirmationModal" 
-   data-delete-url="{% url 'delete_workout' workout.workout_id %}">
-   Back
+<a href="#" class="btn btn-sm btn-danger"
+data-bs-toggle="modal"
+data-bs-target="#confirmationModal"
+data-action-url="{% url 'end_workout' workout.workout_id %}"
+data-title="End Workout"
+data-message="Are you sure you want to end this workout? This cannot be undone."
+data-button="End Workout">
+End Workout
 </a>
 {% endif %}
+{% if workout.status == 'active' %}
+<a href="{% url 'pause_workout' workout.workout_id %}" class="btn btn-sm btn-warning ms-2">Pause</a>
+{% elif workout.status == 'paused' %}
+<a href="{% url 'resume_workout' workout.workout_id %}" class="btn btn-sm btn-success ms-2">Resume</a>
+{% endif %}
+
 {% endblock topleft %}
+
 
 <!--top center block-->
 {% block center %}
@@ -37,13 +46,26 @@
   </div>
 {% endblock center%}
 
+{% block topright %}
+{% load time_filters %}  {# to use duration_hms #}
+<h5 class="mb-0">
+  {% if workout.status == 'completed' %}
+    <div class="text-warning small">Time Taken</div>
+  {% endif %}
+  <span id="live-timer" class="fs-4">{{ workout.get_elapsed_time|duration_hms }}</span>
+</h5>
+
+
+{% endblock topright %}
+
 <!--main content-->
 {% block content %}
 <!-- Workout Name Section -->
 <div class="container mt-4">
     <!-- Section of current exercise data -->
     <div class="row gy-3">
-      {% if exercises %} {% for e in exercises %}
+      {% if exercises %}
+      {% for e in exercises %}
       <div class="col-12">
         <div class="d-flex justify-content-between align-items-center p-3 bg-secondary text-light rounded shadow-sm">
           <div class="p-2">
@@ -62,7 +84,7 @@
               <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton{{ e.exercise_id }}" data-bs-toggle="dropdown" aria-expanded="false">Options</button>
               <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton{{ e.exercise_id }}">
                 <li>
-                  <a class="dropdown-item text-warning" href="{% url 'exercise_details' e.exercise_id %}"> View Details </a>
+                  <a class="dropdown-item text-warning" href="{% url 'exercise_details' e.exercise_id %}"> Edit </a>
                 </li>
                 <li>
                   <a class="dropdown-item text-danger" href="{% url 'delete_exercise' e.exercise_id %}"> Delete </a>
@@ -72,26 +94,34 @@
           </div>
         </div>
       </div>
-      {% endfor %} {% endif %}
+      {% endfor %}
+      {% else %}
+      <div class="text-center text-light mt-4">
+        <h5>No exercises recorded!</h5>
+      </div>
+
+      {% endif %}
     </div>
   </form>
 </div>
 
 <!-- Add Exercise Form -->
+{% if workout.status == 'active' %}
 <div class="container my-4">
   <h3 class="text-warning ms-2">Add Exercise</h3>
-  <form method="POST" class="bg-secondary text-light p-4 rounded shadow-sm">
+  <form method="POST" class="bg-secondary text-light rounded shadow-sm">
     {% csrf_token %}
-    <div class="row mb-3">
-      <div class="col">
+    <div class="row">
+      <div class="col m-4 mb-3">
         <input type="text" name="exercise_name" id="exercise_name" class="form-control bg-dark text-light border-secondary" placeholder="Exercise Name" required />
       </div>
     </div>
-    <div class="d-flex justify-content-center mt-3">
-      <button type="submit" name="add_exercise" class="btn btn-success">Save</button>
+    <div class="text-center" >
+      <button type="submit" name="add_exercise" class="btn btn-success mb-3">Save</button>
     </div>
   </form>
 </div>
+{% endif %}
 
 <script>
   document.addEventListener("DOMContentLoaded", () => {
@@ -114,5 +144,39 @@
     workoutNameInput.addEventListener("input", toggleSaveButton);
   });
 </script>
+
+
+<script>
+  const isActive = "{{ workout.last_active_time|yesno:'true,false' }}" === "true";
+  const isCompleted = "{{ workout.is_completed|yesno:'true,false' }}" === "true";
+  const initialSeconds = "{{ workout.get_elapsed_time }}";
+
+  if (isActive && !isCompleted) {
+    let elapsedSeconds = initialSeconds;
+
+    function formatTime(seconds) {
+      const hours = String(Math.floor(seconds / 3600)).padStart(2, '0');
+      const minutes = String(Math.floor((seconds % 3600) / 60)).padStart(2, '0');
+      const secs = String(seconds % 60).padStart(2, '0');
+      return `${hours}:${minutes}:${secs}`;
+    }
+
+    function updateTimer() {
+      elapsedSeconds++;
+      const display = formatTime(elapsedSeconds);
+      const timerElement = document.getElementById('live-timer');
+      if (timerElement) {
+        timerElement.textContent = display;
+      }
+    }
+
+    // Immediately display first
+    updateTimer();
+    setInterval(updateTimer, 1000);
+  }
+</script>
+
+
+
 
 {% endblock content %}

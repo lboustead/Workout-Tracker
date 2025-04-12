@@ -11,7 +11,7 @@
 
 {% block topleft %}
 {% if sets %}
-  <a href="javascript:window.history.back()" class="btn btn-warning">Back</a>
+  <a href="{% url 'workout_details' workout.workout_id %}" class="btn btn-warning">Back</a>
 {% else %}
   <a href="#" class="btn btn-warning"
      data-bs-toggle="modal"
@@ -23,7 +23,7 @@
 {% endblock topleft %}
 
 
-{% block center %}x
+{% block center %}
 <div class="d-flex align-items-center">
   <form method="POST" id="sets-form" class="d-flex align-items-center mb-0">
     {% csrf_token %}
@@ -53,11 +53,11 @@
             <div class="d-flex">
               <div class="me-3">
                 <label for="weight{{ s.set }}" class="form-label text-warning my-1">Weight</label>
-                <input type="number" name="weight_{{ s.set_id }}" id="weight{{ s.set }}" value="{{ s.weight }}" class="form-control form-control-sm bg-dark text-light border-secondary" />
+                <input type="text" name="weight_{{ s.set_id }}" id="weight{{ s.set }}" value="{{ s.weight }}" class="form-control form-control-sm bg-dark text-light border-secondary text-center" />
               </div>
               <div>
                 <label for="reps{{ s.set }}" class="form-label text-warning my-1">Reps</label>
-                <input type="number" name="reps_{{ s.set_id }}" id="reps{{ s.set }}" value="{{ s.reps }}" class="form-control form-control-sm bg-dark text-light border-secondary" />
+                <input type="text" name="reps_{{ s.set_id }}" id="reps{{ s.set }}" value="{{ s.reps }}" class="form-control form-control-sm bg-dark text-light border-secondary text-center" />
               </div>
             </div>
           <div>
